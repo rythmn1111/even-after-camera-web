@@ -5,6 +5,16 @@ const MAX_BYTES = 100 * 1024; // 100KB
 
 export default async function handler(req, res) {
   console.log("API called:", req.method, req.url);
+  console.log("Headers:", req.headers);
+  
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
   
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -12,8 +22,10 @@ export default async function handler(req, res) {
   }
 
   try {
+    console.log("Request body:", req.body);
     const { dataUrl, filename } = req.body;
     if (!dataUrl || typeof dataUrl !== "string" || !dataUrl.startsWith("data:")) {
+      console.log("Missing or invalid dataUrl");
       return res.status(400).json({ ok: false, error: "Missing dataUrl" });
     }
 
@@ -54,10 +66,12 @@ export default async function handler(req, res) {
     });
 
     const url = `https://arweave.net/${result.id}`;
+    console.log("Upload successful:", url);
     return res.status(200).json({ ok: true, url, id: result.id, size });
   } catch (e) {
     console.error("Upload error:", e);
     const errorMessage = e instanceof Error ? e.message : String(e);
+    console.error("Error details:", errorMessage);
     return res.status(500).json({ ok: false, error: errorMessage });
   }
 }
