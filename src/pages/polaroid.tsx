@@ -140,7 +140,7 @@ export default function PolaroidPage() {
     setUploadedUrl(null);
     setFinalUrl(null);
     try {
-      const r = await fetch("/api/upload", {
+      const r = await fetch("/api/upload-simple", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ dataUrl: processed, filename: `polaroid-${Date.now()}.webp` }),
@@ -202,7 +202,7 @@ export default function PolaroidPage() {
       
       // Upload the QR-baked image
       const bakedDataUrl = canvas.toDataURL("image/jpeg", 0.92);
-      const r = await fetch("/api/upload", {
+      const r = await fetch("/api/upload-simple", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ dataUrl: bakedDataUrl, filename: `polaroid-qr-${Date.now()}.webp` }),
