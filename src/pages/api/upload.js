@@ -1,19 +1,18 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import { Readable } from "node:stream";
 import sharp from "sharp";
 
-type Resp = { ok: true; url: string; id: string; size: number } | { ok: false; error: string };
-
 const MAX_BYTES = 100 * 1024; // 100KB
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<Resp>) {
+export default async function handler(req, res) {
+  console.log("API called:", req.method, req.url);
+  
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ ok: false, error: "Method not allowed" });
   }
 
   try {
-    const { dataUrl, filename } = req.body as { dataUrl?: string; filename?: string };
+    const { dataUrl, filename } = req.body;
     if (!dataUrl || typeof dataUrl !== "string" || !dataUrl.startsWith("data:")) {
       return res.status(400).json({ ok: false, error: "Missing dataUrl" });
     }
@@ -56,7 +55,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
     const url = `https://arweave.net/${result.id}`;
     return res.status(200).json({ ok: true, url, id: result.id, size });
-  } catch (e: unknown) {
+  } catch (e) {
+    console.error("Upload error:", e);
     const errorMessage = e instanceof Error ? e.message : String(e);
     return res.status(500).json({ ok: false, error: errorMessage });
   }
