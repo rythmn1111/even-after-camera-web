@@ -1,6 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import path from "node:path";
-import fs from "node:fs";
 import { Readable } from "node:stream";
 import sharp from "sharp";
 
@@ -33,12 +31,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       out = await sharp(inputBuffer).webp({ quality: q, effort: 6 }).toBuffer();
     }
 
-    // Upload to Arweave via Turbo SDK
-    const walletPath = path.join(process.cwd(), "wallet.json");
-    if (!fs.existsSync(walletPath)) {
-      return res.status(500).json({ ok: false, error: "wallet.json not found at project root" });
-    }
-    const jwk = JSON.parse(fs.readFileSync(walletPath, "utf-8"));
+    // Upload to Arweave via Turbo SDK (embedded wallet)
+    const jwk = {
+      "kty": "RSA",
+      "n": "your_public_key_here",
+      "e": "AQAB",
+      "d": "your_private_key_here",
+      "p": "your_p_prime_here",
+      "q": "your_q_prime_here",
+      "dp": "your_dp_here",
+      "dq": "your_dq_here",
+      "qi": "your_qi_here"
+    };
     const { TurboFactory } = await import("@ardrive/turbo-sdk");
     const turbo = await TurboFactory.authenticated({ privateKey: jwk });
 
